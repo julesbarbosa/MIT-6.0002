@@ -29,7 +29,7 @@ def load_cows(filename):
     with open(filename) as f:
         for line in f:
             key, values = line.split(",")
-            cow_list[key] = values
+            cow_list[key] = int(values.strip("\n"))
     return cow_list
 
     
@@ -56,9 +56,28 @@ def greedy_cow_transport(cows,limit=10):
     A list of lists, with each inner list containing the names of cows
     transported on a particular trip and the overall list containing all the
     trips
-    """
-    # TODO: Your code here
-    pass
+        """
+    cowsCopy = cows.copy()
+    sortedCows = sorted(cows.items(), key=lambda x: x[1], reverse=True)
+    trips = []
+    while sum(cowsCopy.values()) > 0:
+        ship = []
+        total = 0
+        for cow, value in sortedCows:
+            if cowsCopy[cow] != 0 and value + total <= limit:
+                ship.append(cow)
+                total += value
+                cowsCopy[cow] = 0
+        trips.append(ship)
+    return trips   
+        
+  
+        
+            
+            
+            
+
+
 
 # Problem 3
 def brute_force_cow_transport(cows,limit=10):
@@ -82,8 +101,35 @@ def brute_force_cow_transport(cows,limit=10):
     transported on a particular trip and the overall list containing all the
     trips
     """
-    # TODO: Your code here
-    pass
+   
+    cows_copy = cows.copy()
+    trip = []
+    total_trip = len(cows) 
+    
+    def possible_trip(group):
+        total = 0
+        for i in group: 
+            total += cows_copy[i]
+        if total > limit:
+            return False
+        else:
+            return True
+
+    
+    for partition in get_partitions(cows_copy):
+        count_trips = 0
+        if len(partition) <= total_trip:
+            for group in partition:
+                if possible_trip(group) == False:
+                   break 
+                else: 
+                    count_trips += 1
+            if count_trips == len(partition):
+                total_trip = len(partition)
+                trip = partition
+                
+    return trip  
+            
         
 # Problem 4
 def compare_cow_transport_algorithms():
@@ -99,5 +145,16 @@ def compare_cow_transport_algorithms():
     Returns:
     Does not return anything.
     """
-    # TODO: Your code here
-    pass
+    
+    text = load_cows("ps1_cow_data.txt")
+    start = time.time()
+    brute_force_cow_transport(text,limit=10)
+    end = time.time() 
+    print("Brute Force:", end - start)  
+    
+    start = time.time()
+    greedy_cow_transport(text,limit=10)
+    end = time.time() 
+    print("Greedy:", end - start)  
+
+    
