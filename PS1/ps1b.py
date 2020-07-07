@@ -22,8 +22,24 @@ def dp_make_weight(egg_weights, target_weight, memo = {}):
     
     Returns: int, smallest number of eggs needed to make target weight
     """
-    # TODO: Your code here
-    pass
+    count_eggs = 0
+    new_eggs = egg_weights[::-1] 
+    
+    if egg_weights == [] or target_weight == 0:
+      return 0
+    elif target_weight in egg_weights:
+        count_eggs = count_eggs + 1
+        return count_eggs
+    else:
+        for i in new_eggs:
+            while i <= target_weight:
+                target_weight = target_weight - i 
+                count_eggs += 1
+        return count_eggs
+                
+        
+        
+
 
 # EXAMPLE TESTING CODE, feel free to add more if you'd like
 if __name__ == '__main__':
@@ -31,6 +47,6 @@ if __name__ == '__main__':
     n = 99
     print("Egg weights = (1, 5, 10, 25)")
     print("n = 99")
-    print("Expected ouput: 9 (3 * 25 + 2 * 10 + 4 * 1 = 99)")
+    print("Expected ouput: 4 (3 * 25 + 2 * 10 + 4 * 1 = 99)")
     print("Actual output:", dp_make_weight(egg_weights, n))
     print()
