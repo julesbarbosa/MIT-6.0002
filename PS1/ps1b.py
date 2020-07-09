@@ -22,20 +22,45 @@ def dp_make_weight(egg_weights, target_weight, memo = {}):
     
     Returns: int, smallest number of eggs needed to make target weight
     """
-    count_eggs = 0
-    new_eggs = egg_weights[::-1] 
+        ## ITERATIVE VERSION #### 
+    # count_eggs = 0
+    # new_eggs = egg_weights[::-1] 
     
-    if egg_weights == [] or target_weight == 0:
-      return 0
-    elif target_weight in egg_weights:
-        count_eggs = count_eggs + 1
-        return count_eggs
+    # if egg_weights == [] or target_weight == 0:
+    #   return 0
+    # elif target_weight in egg_weights:
+    #     count_eggs = count_eggs + 1
+    #     return count_eggs
+    # else:
+    #     for i in new_eggs:
+    #         while i <= target_weight:
+    #             target_weight = target_weight - i 
+    #             count_eggs += 1
+    #     return count_eggs
+    
+    ########
+    
+    new_eggs = egg_weights
+    
+    if target_weight in memo:
+        return memo[target_weight]
+    elif len(new_eggs) == 1:     
+        result = target_weight
+    elif new_eggs[-1] > target_weight:      
+        result = dp_make_weight(new_eggs[:-1], target_weight, memo)
     else:
-        for i in new_eggs:
-            while i <= target_weight:
-                target_weight = target_weight - i 
-                count_eggs += 1
-        return count_eggs
+        nextItem = new_eggs[-1]
+        Withvalue = dp_make_weight(new_eggs, target_weight - nextItem, memo)
+        Withvalue += 1
+        
+        WithoutValue = dp_make_weight(new_eggs[:-1], target_weight, memo)
+        
+        if Withvalue > WithoutValue:
+            result = WithoutValue
+        else:
+            result = Withvalue
+    memo[target_weight] = result
+    return result
                 
         
         
@@ -47,6 +72,6 @@ if __name__ == '__main__':
     n = 99
     print("Egg weights = (1, 5, 10, 25)")
     print("n = 99")
-    print("Expected ouput: 4 (3 * 25 + 2 * 10 + 4 * 1 = 99)")
+    print("Expected ouput: 9 (3 * 25 + 2 * 10 + 4 * 1 = 99)")
     print("Actual output:", dp_make_weight(egg_weights, n))
     print()
