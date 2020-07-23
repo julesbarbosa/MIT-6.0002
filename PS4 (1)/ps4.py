@@ -8,6 +8,7 @@ import numpy as np
 import pylab as pl
 import random
 
+random.seed(0)
 
 ##########################
 # End helper code
@@ -88,7 +89,8 @@ class SimpleBacteria(object):
                 probability
             death_prob (float in [0, 1]): Maximum death probability
         """
-        pass  # TODO
+        self.birth_prob = birth_prob
+        self.death_prob = death_prob
 
     def is_killed(self):
         """
@@ -99,7 +101,13 @@ class SimpleBacteria(object):
         Returns:
             bool: True with probability self.death_prob, False otherwise.
         """
-        pass  # TODO
+        r = random.random()
+        # print(r, '<=', self.death_prob)
+        if r <= self.death_prob:
+            return True
+        else:
+            return False
+        
 
     def reproduce(self, pop_density):
         """
@@ -127,9 +135,13 @@ class SimpleBacteria(object):
         Raises:
             NoChildException if this bacteria cell does not reproduce.
         """
-        pass  # TODO
-
-
+        if random.random() <= self.birth_prob * (1 - pop_density):
+            bacteria = SimpleBacteria(self.birth_prob, self.death_prob)
+            return bacteria
+        else:
+            raise ValueError('NoChildException')
+           
+        
 class Patient(object):
     """
     Representation of a simplified patient. The patient does not take any
@@ -142,7 +154,8 @@ class Patient(object):
             max_pop (int): Maximum possible bacteria population size for
                 this patient
         """
-        pass  # TODO
+        self.bacteria = bacteria
+        self.max_pop = max_pop
 
     def get_total_pop(self):
         """
@@ -151,7 +164,7 @@ class Patient(object):
         Returns:
             int: The total bacteria population
         """
-        pass  # TODO
+        return len(self.bacteria)
 
     def update(self):
         """
@@ -177,7 +190,17 @@ class Patient(object):
         Returns:
             int: The total bacteria population at the end of the update
         """
-        pass  # TODO
+        survived = [b for b in self.bacteria if not b.is_killed()]  
+        pop_density = len(survived)/ self.max_pop
+        offspring = []
+        for b in self.bacteria:
+            try:
+                offspring.append(b.reproduce(pop_density))
+            except:
+                pass
+            
+        self.bacteria = survived + offspring
+        return self.get_total_pop()
 
 
 ##########################
@@ -195,8 +218,11 @@ def calc_pop_avg(populations, n):
     Returns:
         float: The average bacteria population size at time step n
     """
-    pass  # TODO
-
+    total_bacteria = 0
+    for i in populations:
+        total_bacteria += i[n]
+    return total_bacteria/ len(populations)
+    
 
 def simulation_without_antibiotic(num_bacteria,
                                   max_pop,
@@ -231,11 +257,40 @@ def simulation_without_antibiotic(num_bacteria,
         populations (list of lists or 2D array): populations[i][j] is the
             number of bacteria in trial i at time step j
     """
-    pass  # TODO
+    populations = []
+    while num_trials != 0:     
+        bacteria = []
+        for i in range(num_bacteria):
+            bacteria.append(SimpleBacteria(birth_prob, death_prob))
+        
+        patient = Patient(bacteria, max_pop) 
+        
+        n = 300
+        total = [patient.get_total_pop()]
+        while n != 0:
+            total.append(patient.update())
+            n -= 1    
+        populations.append(total)
+        num_trials -= 1
+    
+    y_cor = []
+    x_cor= []
+    for i in range(300):    
+        x_cor.append(calc_pop_avg(populations, i))
+        y_cor.append(i)
+    make_one_curve_plot( y_cor,x_cor, "TimeStep", "AVG population", "Without Antibiotic")
+    
+    return populations
+        
+    
+    
+    
+        
+        
 
 
 # When you are ready to run the simulation, uncomment the next line
-# populations = simulation_without_antibiotic(100, 1000, 0.1, 0.025, 50)
+populations = simulation_without_antibiotic(100, 1000, 0.1, 0.025, 50)
 
 ##########################
 # PROBLEM 3
