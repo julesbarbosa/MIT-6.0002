@@ -258,7 +258,15 @@ def gen_cities_avg(climate, multi_cities, years):
         this array corresponds to the average annual temperature over the given
         cities for a given year.
     """
-    
+    avg = [] 
+    for year in years:
+        city_avg = []
+        for city in multi_cities:
+            city_avg.append(np.mean(climate.get_yearly_temp(city, year)))
+        avg.append(np.mean(city_avg))
+        
+        
+    return np.array(avg)
 
 def moving_average(y, window_length):
     """
@@ -274,8 +282,17 @@ def moving_average(y, window_length):
         an 1-d pylab array with the same length as y storing moving average of
         y-coordinates of the N sample points
     """
-    # TODO
-    pass
+    mv_avgs = []
+    for i in range(len(y)):
+        if (i - window_length + 1) <= 0:
+            first_index = 0
+        else:
+            first_index = i - window_length + 1
+        last_index = i + 1
+        mv_avg = np.mean(y[first_index:last_index])
+        mv_avgs.append(mv_avg)
+    return mv_avgs
+
 
 def rmse(y, estimated):
     """
@@ -357,22 +374,30 @@ if __name__ == '__main__':
 
     # Part B
     
-    temp = []
-    x = np.array(range(1961, 2009), dtype='int')
-    for year in x:      
-        avg = np.mean(clima.get_yearly_temp("NEW YORK", year))
-        temp.append(avg)
+    # temp = []
+    # x = np.array(range(1961, 2009), dtype='int')
+    # for year in x:      
+    #     avg = np.mean(clima.get_yearly_temp("NEW YORK", year))
+    #     temp.append(avg)
     
-    y = np.array(temp, dtype='float')
+    # y = np.array(temp, dtype='float')
+    
+    # models = generate_models(x, y, degs= [1])
+    # evaluate_models_on_training(x, y, models)
+
+    # Part C
+    
+    years = list(range(1961, 2009))
+    x = np.array(range(1961, 2009), dtype = "int")
+    y = gen_cities_avg(clima, CITIES, years)
+    
     
     models = generate_models(x, y, degs= [1])
     evaluate_models_on_training(x, y, models)
-
-    # Part C
-    # TODO: replace this line with your code
-
+    
+    
     # Part D.2
-    # TODO: replace this line with your code
-
+    
+    
     # Part E
     # TODO: replace this line with your code
