@@ -224,7 +224,7 @@ def evaluate_models_on_training(x, y, models):
         predict = np.poly1d(model)
         predictions = predict(x)
         r2.append(r_squared(y, predictions))
-        degree += 1
+        degree = len(model) - 1
         
         x_lin_reg = range(1961, 2009)
         y_lin_reg = predict(x_lin_reg)
@@ -307,8 +307,10 @@ def rmse(y, estimated):
     Returns:
         a float for the root mean square error term
     """
-    # TODO
-    pass
+    error = np.sum((y - estimated)**2)
+    rmse = np.sqrt(error/len(y))
+    
+    return rmse
 
 def gen_std_devs(climate, multi_cities, years):
     """
@@ -325,8 +327,22 @@ def gen_std_devs(climate, multi_cities, years):
         this array corresponds to the standard deviation of the average annual 
         city temperatures for the given cities in a given year.
     """
-    # TODO
-    pass
+    std = [] 
+    for year in years:
+        city_mean = []
+        for city in multi_cities:
+            city_mean.append((climate.get_yearly_temp(city, year)))
+        daily_mean = np.mean(city_mean)
+        year_mean = np.mean(daily_mean)                 
+        error = np.sum((city_mean - year_mean)**2)
+        year_std = np.sqrt(error/len(city_mean))
+        
+        std.append(year_std)
+ 
+    
+            
+    return np.array(std)
+    
 
 def evaluate_models_on_testing(x, y, models):
     """
@@ -352,8 +368,23 @@ def evaluate_models_on_testing(x, y, models):
     Returns:
         None
     """
-    # TODO
-    pass
+    rsme_results = []
+ 
+    for model in models:
+        predict = np.poly1d(model)
+        predictions = predict(x)
+        rsme_results.append(rmse(y, predictions))
+        degree = len(model)-1
+        
+        x_lin_reg = range(2010, 2015)
+        y_lin_reg = predict(x_lin_reg)
+        plt.scatter(x, y)
+        plt.plot(x_lin_reg, y_lin_reg, label= degree)
+        plt.xlabel("Years")
+        plt.ylabel("Degrees Celsius")
+        plt.title("RSME:"+ str(r_squared(y, predictions))+ "degree:" + str(degree))
+        plt.legend()
+        
 
 if __name__ == '__main__':
     
@@ -361,31 +392,31 @@ if __name__ == '__main__':
 
     # Part A.4
     
-    # temp = []
-    # x = np.array(range(1961, 2009))
-    # for year in x:
-    #     temp.append(clima.get_daily_temp("NEW YORK", 1, 20, year))
-    # y = np.array(temp)
+    temp = []
+    x = np.array(range(1961, 2009))
+    for year in x:
+        temp.append(clima.get_daily_temp("NEW YORK", 1, 20, year))
+    y = np.array(temp)
     
-    # models = generate_models(x, y, degs= [1])
-    # evaluate_models_on_training(x, y, models)
+    models = generate_models(x, y, degs= [1])
+    evaluate_models_on_training(x, y, models)
  
         
 
-    # Part B
+    ## Part B
     
-    # temp = []
-    # x = np.array(range(1961, 2009), dtype='int')
-    # for year in x:      
-    #     avg = np.mean(clima.get_yearly_temp("NEW YORK", year))
-    #     temp.append(avg)
+    temp = []
+    x = np.array(range(1961, 2009), dtype='int')
+    for year in x:      
+        avg = np.mean(clima.get_yearly_temp("NEW YORK", year))
+        temp.append(avg)
     
-    # y = np.array(temp, dtype='float')
+    y = np.array(temp, dtype='float')
     
-    # models = generate_models(x, y, degs= [1])
-    # evaluate_models_on_training(x, y, models)
+    models = generate_models(x, y, degs= [1])
+    evaluate_models_on_training(x, y, models)
 
-    # Part C
+    ##Part C
     
     years = list(range(1961, 2009))
     x = np.array(range(1961, 2009), dtype = "int")
@@ -396,7 +427,48 @@ if __name__ == '__main__':
     evaluate_models_on_training(x, y, models)
     
     
+    
+    ## Moving avarage 5
+    
+    years = list(range(1961, 2009))
+    x = np.array(range(1961, 2009), dtype = "int")
+    y_avg = gen_cities_avg(clima, CITIES, years)
+    y = moving_average(y_avg, 5)
+    
+    
+    models = generate_models(x, y, degs=[1, 2,20])
+    # evaluate_models_on_training(x, y, models)
+    
+    ## Part D  Test data evaluation
+    
+    temp = []
+    x_train = np.array(range(2010, 2015))
+    
+    for year in x_train:
+        temp.append(clima.get_daily_temp("NEW YORK", 1, 20, year))
+    y_train = np.array(temp)
+    
+    temp = []
+    x_test = np.array(range(2010, 2015))
+    for year in x_test:
+        temp.append(clima.get_daily_temp("NEW YORK", 1, 20, year))
+    y_test = np.array(temp)
+    
+    models = generate_models(x_train, y_train, degs= [1])
+    # evaluate_models_on_testing(x_test, y_test, models)
+    
+    ## MOving avarage 5
+    
+    years = list(range(2010, 2015))
+    x_test = np.array(range(2010, 2015), dtype = "int")
+    y_avg = gen_cities_avg(clima, CITIES, years)
+    y_test = moving_average(y_avg, 5)
+    evaluate_models_on_testing(x_test, y_test, models)
+    
+    
     # Part D.2
+    
+    
     
     
     # Part E
